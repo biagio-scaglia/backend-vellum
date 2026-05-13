@@ -103,9 +103,9 @@ async function runSync() {
             id: data.index,
             name: data.name,
             type: 'item',
-            description: data.desc ? (Array.isArray(data.desc) ? data.desc.join('\n\n') : data.desc.toString()) : 'Nessuna descrizione.',
-            shortDescription: 'Oggetto Magico',
-            metaInfo: 'Oggetto',
+            description: data.desc ? (Array.isArray(data.desc) ? data.desc.join('\n\n') : data.desc.toString()) : 'No description.',
+            shortDescription: 'Magic Item',
+            metaInfo: 'Magic Item',
             isFavorite: false
           });
         } catch (e) {
@@ -127,9 +127,9 @@ async function runSync() {
             id: data.index,
             name: data.name,
             type: 'class',
-            description: `Dadi Vita: d${data.hit_die || '?'}\n\nCompetenze: ${data.proficiencies?.map(p => p.name).join(', ') || 'Nessuna'}`,
-            shortDescription: 'Classe',
-            metaInfo: 'Classe',
+            description: `Hit Die: d${data.hit_die || '?'}\n\nProficiencies: ${data.proficiencies?.map(p => p.name).join(', ') || 'None'}`,
+            shortDescription: 'Class',
+            metaInfo: 'Class',
             isFavorite: false
           });
         } catch (e) {
@@ -151,9 +151,9 @@ async function runSync() {
             id: data.index,
             name: data.name,
             type: 'race',
-            description: `Velocità: ${data.speed || '?'}\nTaglia: ${data.size || '?'}\n\nAllineamento: ${data.alignment || 'Nessuno'}\n\nTratti: ${data.traits?.map(t => t.name).join(', ') || 'Nessuno'}`,
-            shortDescription: 'Razza',
-            metaInfo: 'Razza',
+            description: `Speed: ${data.speed || '?'}\nSize: ${data.size || '?'}\n\nAlignment: ${data.alignment || 'None'}\n\nTraits: ${data.traits?.map(t => t.name).join(', ') || 'None'}`,
+            shortDescription: 'Race',
+            metaInfo: 'Race',
             isFavorite: false
           });
         } catch (e) {
