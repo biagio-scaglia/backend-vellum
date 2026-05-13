@@ -39,9 +39,45 @@ async function fetchMonsterDetails(index) {
   return resp.data;
 }
 
+async function fetchMagicItems() {
+  const resp = await apiClient.get('/magic-items');
+  return resp.data.results;
+}
+
+async function fetchMagicItemDetails(index) {
+  const resp = await apiClient.get(`/magic-items/${index}`);
+  return resp.data;
+}
+
+async function fetchClasses() {
+  const resp = await apiClient.get('/classes');
+  return resp.data.results;
+}
+
+async function fetchClassDetails(index) {
+  const resp = await apiClient.get(`/classes/${index}`);
+  return resp.data;
+}
+
+async function fetchRaces() {
+  const resp = await apiClient.get('/races');
+  return resp.data.results;
+}
+
+async function fetchRaceDetails(index) {
+  const resp = await apiClient.get(`/races/${index}`);
+  return resp.data;
+}
+
 module.exports = {
   fetchSpells,
   fetchSpellDetails,
   fetchMonsters,
-  fetchMonsterDetails
+  fetchMonsterDetails,
+  fetchMagicItems,
+  fetchMagicItemDetails,
+  fetchClasses,
+  fetchClassDetails,
+  fetchRaces,
+  fetchRaceDetails
 };

@@ -91,6 +91,79 @@ async function runSync() {
     // Aspetta che tutti i mostri siano scaricati
     await Promise.all(monsterPromises);
 
+    // 3. Magic Items
+    console.log('[Sync] Scaricamento lista magic items...');
+    const items = await dndApi.fetchMagicItems();
+    console.log(`[Sync] Scaricamento dettagli per ${items.length} magic items...`);
+    const itemPromises = items.map(item => {
+      return limit(async () => {
+        try {
+          const data = await dndApi.fetchMagicItemDetails(item.index);
+          allItems.push({
+            id: data.index,
+            name: data.name,
+            type: 'item',
+            description: data.desc ? (Array.isArray(data.desc) ? data.desc.join('\n\n') : data.desc.toString()) : 'Nessuna descrizione.',
+            shortDescription: 'Oggetto Magico',
+            metaInfo: 'Oggetto',
+            isFavorite: false
+          });
+        } catch (e) {
+          console.error(`[Sync] Errore item ${item.index}:`, e.message);
+          errorCount++;
+        }
+      });
+    });
+    await Promise.all(itemPromises);
+
+    // 4. Classes
+    console.log('[Sync] Scaricamento lista classes...');
+    const classes = await dndApi.fetchClasses();
+    const classPromises = classes.map(c => {
+      return limit(async () => {
+        try {
+          const data = await dndApi.fetchClassDetails(c.index);
+          allItems.push({
+            id: data.index,
+            name: data.name,
+            type: 'class',
+            description: `Dadi Vita: d${data.hit_die || '?'}\n\nCompetenze: ${data.proficiencies?.map(p => p.name).join(', ') || 'Nessuna'}`,
+            shortDescription: 'Classe',
+            metaInfo: 'Classe',
+            isFavorite: false
+          });
+        } catch (e) {
+          console.error(`[Sync] Errore classe ${c.index}:`, e.message);
+          errorCount++;
+        }
+      });
+    });
+    await Promise.all(classPromises);
+
+    // 5. Races
+    console.log('[Sync] Scaricamento lista races...');
+    const races = await dndApi.fetchRaces();
+    const racePromises = races.map(r => {
+      return limit(async () => {
+        try {
+          const data = await dndApi.fetchRaceDetails(r.index);
+          allItems.push({
+            id: data.index,
+            name: data.name,
+            type: 'race',
+            description: `Velocità: ${data.speed || '?'}\nTaglia: ${data.size || '?'}\n\nAllineamento: ${data.alignment || 'Nessuno'}\n\nTratti: ${data.traits?.map(t => t.name).join(', ') || 'Nessuno'}`,
+            shortDescription: 'Razza',
+            metaInfo: 'Razza',
+            isFavorite: false
+          });
+        } catch (e) {
+          console.error(`[Sync] Errore razza ${r.index}:`, e.message);
+          errorCount++;
+        }
+      });
+    });
+    await Promise.all(racePromises);
+
     // Aggiorna la cache e salva su file
     cache.updateCache(allItems, {
       syncStatus: 'idle',
