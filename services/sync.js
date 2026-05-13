@@ -20,12 +20,12 @@ async function runSync() {
   const allItems = [];
   let errorCount = 0;
 
+  // 1. Spells
   try {
-    // 1. Spells
     console.log('[Sync] Scaricamento lista spells...');
     const spells = await dndApi.fetchSpells();
     
-    console.log(`[Sync] Scaricamento dettagli per ${spells.length} spells (concorrenza: ${config.concurrencyLimit})...`);
+    console.log(`[Sync] Scaricamento dettagli per ${spells.length} spells...`);
     
     const spellPromises = spells.map(spell => {
       return limit(async () => {
@@ -49,14 +49,20 @@ async function runSync() {
       });
     });
 
-    // Aspetta che tutte le spell siano scaricate
     await Promise.all(spellPromises);
+    // Salva il progresso parziale
+    cache.updateCache(allItems, { syncStatus: 'syncing' });
+  } catch (e) {
+    console.error('[Sync] Errore critico spells:', e.message);
+    errorCount++;
+  }
 
-    // 2. Monsters
+  // 2. Monsters
+  try {
     console.log('[Sync] Scaricamento lista monsters...');
     const monsters = await dndApi.fetchMonsters();
     
-    console.log(`[Sync] Scaricamento dettagli per ${monsters.length} monsters (concorrenza: ${config.concurrencyLimit})...`);
+    console.log(`[Sync] Scaricamento dettagli per ${monsters.length} monsters...`);
     
     const monsterPromises = monsters.map(monster => {
       return limit(async () => {
@@ -88,10 +94,16 @@ async function runSync() {
       });
     });
 
-    // Aspetta che tutti i mostri siano scaricati
     await Promise.all(monsterPromises);
+    // Salva il progresso parziale
+    cache.updateCache(allItems, { syncStatus: 'syncing' });
+  } catch (e) {
+    console.error('[Sync] Errore critico monsters:', e.message);
+    errorCount++;
+  }
 
-    // 3. Magic Items
+  // 3. Magic Items
+  try {
     console.log('[Sync] Scaricamento lista magic items...');
     const items = await dndApi.fetchMagicItems();
     console.log(`[Sync] Scaricamento dettagli per ${items.length} magic items...`);
@@ -115,10 +127,18 @@ async function runSync() {
       });
     });
     await Promise.all(itemPromises);
+    // Salva il progresso parziale
+    cache.updateCache(allItems, { syncStatus: 'syncing' });
+  } catch (e) {
+    console.error('[Sync] Errore critico items:', e.message);
+    errorCount++;
+  }
 
-    // 4. Classes
+  // 4. Classes
+  try {
     console.log('[Sync] Scaricamento lista classes...');
     const classes = await dndApi.fetchClasses();
+    console.log(`[Sync] Scaricamento dettagli per ${classes.length} classes...`);
     const classPromises = classes.map(c => {
       return limit(async () => {
         try {
@@ -139,10 +159,18 @@ async function runSync() {
       });
     });
     await Promise.all(classPromises);
+    // Salva il progresso parziale
+    cache.updateCache(allItems, { syncStatus: 'syncing' });
+  } catch (e) {
+    console.error('[Sync] Errore critico classes:', e.message);
+    errorCount++;
+  }
 
-    // 5. Races
+  // 5. Races
+  try {
     console.log('[Sync] Scaricamento lista races...');
     const races = await dndApi.fetchRaces();
+    console.log(`[Sync] Scaricamento dettagli per ${races.length} races...`);
     const racePromises = races.map(r => {
       return limit(async () => {
         try {
@@ -163,18 +191,18 @@ async function runSync() {
       });
     });
     await Promise.all(racePromises);
-
-    // Aggiorna la cache e salva su file
-    cache.updateCache(allItems, {
-      syncStatus: 'idle',
-      lastError: errorCount > 0 ? `${errorCount} errori durante il sync` : null
-    });
-    
-    console.log(`[Sync] Sincronizzazione completata! Totale elementi: ${allItems.length}`);
   } catch (e) {
-    console.error('[Sync] Errore critico durante il sync:', e.message);
-    cache.setSyncStatus('error', e.message);
+    console.error('[Sync] Errore critico races:', e.message);
+    errorCount++;
   }
+
+  // Aggiorna la cache finale
+  cache.updateCache(allItems, {
+    syncStatus: 'idle',
+    lastError: errorCount > 0 ? `${errorCount} errori durante il sync` : null
+  });
+  
+  console.log(`[Sync] Sincronizzazione completata! Totale elementi: ${allItems.length}`);
 }
 
 module.exports = {
